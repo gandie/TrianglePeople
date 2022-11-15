@@ -13,12 +13,12 @@ WHEELDOWN = 5
 WIDTH = 1000
 HEIGHT = 1000
 RESOLUTION = (WIDTH, HEIGHT)
-NUM_PEOPLE = 3
+NUM_PEOPLE = 5
 
 
 class Person:
     '''
-    A person trying to form a triangle with two other random
+    A person trying to form an equilateral triangle with two other random
     persons
     '''
 
@@ -26,7 +26,7 @@ class Person:
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.size = size
-        self.speed = 1
+        self.speed = 1 / FPS
 
     def setup(self, people):
         '''
@@ -41,8 +41,10 @@ class Person:
 
     def move(self, dt):
         '''
-        Clumsy ugly moving magic happens here.
+        Clumsy ugly movement magic happens here.
         Called each tick
+        Calculate closest target point to form equilateral triangle with
+        partners, slow down when close to target
         '''
 
         me = pygame.math.Vector2(
@@ -60,28 +62,36 @@ class Person:
             self.pb.pos_y,
         )
 
-        ba = vb - va
-        rot_ba = ba.copy().normalize().rotate(90)
+        ab = vb - va
+        rot_ab_left = ab.copy().normalize().rotate(90)
+        rot_ab_right = ab.copy().normalize().rotate(-90)
 
-        r = ba.length()
-        h = (r / 2) * (3 ** 0.5)
+        triangle_sl = ab.length()
+        triangle_height = (triangle_sl / 2) * (3 ** 0.5)
 
-        c = vb + 0.5 * ba + rot_ba * h
+        target_left = va + 0.5 * ab + rot_ab_left * triangle_height
+        target_right = va + 0.5 * ab + rot_ab_right * triangle_height
 
-        to_c = c - me
+        to_target_left = target_left - me
+        to_target_right = target_right - me
 
-        '''
-        err = to_c.length()
+        if to_target_left.length() < to_target_right.length():
+            to_target = to_target_left
+        else:
+            to_target = to_target_right
+
+        err = to_target.copy().length()
+
         if err < 10:
-            self.speed *= 0.9
+            self.speed *= 0.8
 
-        '''
-        to_c_norm = to_c.copy().normalize()
+        if err == 0:
+            return
 
-        print(to_c)
+        to_target_norm = to_target.copy().normalize()
 
-        self.pos_x += to_c_norm.x * self.speed
-        self.pos_y += to_c_norm.y * self.speed
+        self.pos_x += to_target_norm.x * self.speed * dt
+        self.pos_y += to_target_norm.y * self.speed * dt
 
     def draw(self, display):
         '''
@@ -123,10 +133,8 @@ def main():
     # prepare people
     people = [
         Person(
-            #pos_x=random.randint(0, WIDTH),
-            #pos_y=random.randint(0, HEIGHT),
-            pos_x=random.randint(250, 750),
-            pos_y=random.randint(250, 750),
+            pos_x=random.randint((1/4)*WIDTH, (3/4)*WIDTH),
+            pos_y=random.randint((1/4)*HEIGHT, (3/4)*HEIGHT),
         )
         for _ in range(NUM_PEOPLE)
     ]
