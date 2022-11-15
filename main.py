@@ -13,7 +13,7 @@ WHEELDOWN = 5
 WIDTH = 1000
 HEIGHT = 1000
 RESOLUTION = (WIDTH, HEIGHT)
-NUM_PEOPLE = 10
+NUM_PEOPLE = 3
 
 
 class Person:
@@ -22,10 +22,11 @@ class Person:
     persons
     '''
 
-    def __init__(self, pos_x, pos_y, size=10):
+    def __init__(self, pos_x, pos_y, size=10, speed=1):
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.size = size
+        self.speed = 1
 
     def setup(self, people):
         '''
@@ -40,15 +41,53 @@ class Person:
 
     def move(self, dt):
         '''
-        Moving magic happens here. Random for now ...
+        Clumsy ugly moving magic happens here.
+        Called each tick
         '''
-        self.pos_x += random.uniform(-2, 2)
-        self.pos_y += random.uniform(-2, 2)
+
+        me = pygame.math.Vector2(
+            self.pos_x,
+            self.pos_y,
+        )
+
+        va = pygame.math.Vector2(
+            self.pa.pos_x,
+            self.pa.pos_y,
+        )
+
+        vb = pygame.math.Vector2(
+            self.pb.pos_x,
+            self.pb.pos_y,
+        )
+
+        ba = vb - va
+        rot_ba = ba.copy().normalize().rotate(90)
+
+        r = ba.length()
+        h = (r / 2) * (3 ** 0.5)
+
+        c = vb + 0.5 * ba + rot_ba * h
+
+        to_c = c - me
+
+        '''
+        err = to_c.length()
+        if err < 10:
+            self.speed *= 0.9
+
+        '''
+        to_c_norm = to_c.copy().normalize()
+
+        print(to_c)
+
+        self.pos_x += to_c_norm.x * self.speed
+        self.pos_y += to_c_norm.y * self.speed
 
     def draw(self, display):
         '''
         Create a surface and draw yourself on display
         Do not care for colors
+        Called each tick after movement
         '''
 
         red = 0
@@ -84,8 +123,10 @@ def main():
     # prepare people
     people = [
         Person(
-            pos_x=random.randint(0, WIDTH),
-            pos_y=random.randint(0, HEIGHT),
+            #pos_x=random.randint(0, WIDTH),
+            #pos_y=random.randint(0, HEIGHT),
+            pos_x=random.randint(250, 750),
+            pos_y=random.randint(250, 750),
         )
         for _ in range(NUM_PEOPLE)
     ]
