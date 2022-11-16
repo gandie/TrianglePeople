@@ -13,7 +13,9 @@ WHEELDOWN = 5
 WIDTH = 1000
 HEIGHT = 1000
 RESOLUTION = (WIDTH, HEIGHT)
-NUM_PEOPLE = 5
+RED = (255, 0, 0, 0)
+GREEN = (0, 255, 0, 0)
+BLUE = (0, 0, 255, 0)
 
 
 class Person:
@@ -27,6 +29,7 @@ class Person:
         self.pos_y = pos_y
         self.size = size
         self.speed = 1 / FPS
+        self.color = BLUE
 
     def setup(self, people):
         '''
@@ -82,12 +85,18 @@ class Person:
 
         err = to_target.copy().length()
 
-        if err < 10:
-            self.speed *= 0.8
+        if err < 10 and self.speed > 0.0005:
+            self.speed *= 0.9
 
-        if err == 0:
+        if err > 100:
+            self.speed = 1 / FPS
+
+        if err < 0.01:
+            print('match!')
+            self.color = GREEN
             return
 
+        self.color = BLUE
         to_target_norm = to_target.copy().normalize()
 
         self.pos_x += to_target_norm.x * self.speed * dt
@@ -110,7 +119,7 @@ class Person:
 
         pygame.draw.rect(
             surface,
-            (red, green, blue, 0),
+            self.color,
             (0, 0, self.size, self.size),
         )
 
@@ -118,7 +127,21 @@ class Person:
         display.blit(surface, (self.pos_x, self.pos_y))
 
 
-def main():
+def setup_people(args):
+    # prepare people
+    people = [
+        Person(
+            pos_x=random.randint((1/4)*WIDTH, (3/4)*WIDTH),
+            pos_y=random.randint((1/4)*HEIGHT, (3/4)*HEIGHT),
+        )
+        for _ in range(args.num_people)
+    ]
+    for person in people:
+        person.setup(people)
+    return people
+
+
+def main(args):
 
     pygame.init()
 
@@ -130,16 +153,7 @@ def main():
     clock = pygame.time.Clock()
     running = True
 
-    # prepare people
-    people = [
-        Person(
-            pos_x=random.randint((1/4)*WIDTH, (3/4)*WIDTH),
-            pos_y=random.randint((1/4)*HEIGHT, (3/4)*HEIGHT),
-        )
-        for _ in range(NUM_PEOPLE)
-    ]
-    for person in people:
-        person.setup(people)
+    people = setup_people(args)
 
     # main loop
     while running:
@@ -190,10 +204,21 @@ def main():
                 elif event.key == pygame.K_RIGHT:
                     pass
                 elif event.key == pygame.K_BACKSPACE:
-                    pass
+                    people = setup_people(args)
+                    print(8)
                 else:
                     pass
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser('TrianglePeople')
+    parser.add_argument(
+        'num_people',
+        help='Number of people to involve. Default is 5',
+        type=int,
+        default=5
+    )
+
+    args = parser.parse_args()
+
+    main(args)
