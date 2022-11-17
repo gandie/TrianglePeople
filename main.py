@@ -91,10 +91,10 @@ class Person:
         err = to_target.copy().length()
         to_target_norm = to_target.copy().normalize()
 
-        if err < 2 * self.err_tol and self.speed > 0.01:
+        if err < 2 * (self.err_tol ** 0.5) and self.speed > 0.01:
             self.speed *= 0.9
 
-        if err > 2 * self.err_tol:
+        if err > 2 * (self.err_tol ** 0.5):
             self.speed = 1 / FPS
 
         if err < self.err_tol:

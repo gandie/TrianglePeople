@@ -1,6 +1,6 @@
 # TrianglePeople
 
-Simulate a group of people where each individual tries to form a equilateral triangle with two random partners from the group without further communication.
+Simulate a group of people where each individual tries to form an equilateral triangle with two random partners from the group without further communication.
 Created for fun and to examine wether a large group of perfectionists can ever finish this game.
 
 # Installation
