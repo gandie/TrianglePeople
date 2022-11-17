@@ -28,7 +28,7 @@ class Person:
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.size = size
-        self.speed = 1 / FPS
+        self.speed = speed / FPS
         self.color = BLUE
 
     def setup(self, people):
@@ -108,13 +108,8 @@ class Person:
     def draw(self, display):
         '''
         Create a surface and draw yourself on display
-        Do not care for colors
         Called each tick after movement
         '''
-
-        red = 0
-        green = 255
-        blue = 0
 
         surface = pygame.Surface(
             (self.size, self.size)
@@ -208,7 +203,6 @@ def main(args):
                     pass
                 elif event.key == pygame.K_BACKSPACE:
                     people = setup_people(args)
-                    print(8)
                 else:
                     pass
 
