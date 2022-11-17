@@ -17,6 +17,8 @@ RED = (255, 0, 0, 0)
 GREEN = (0, 255, 0, 0)
 BLUE = (0, 0, 255, 0)
 
+SEED = 'dunkelschwarzerheisserkaffee'
+
 
 class Person:
     '''
@@ -87,10 +89,10 @@ class Person:
         err = to_target.copy().length()
         to_target_norm = to_target.copy().normalize()
 
-        if err < 10 and self.speed > 0.005:
+        if err < 10 and self.speed > 0.01:
             self.speed *= 0.9
 
-        if err > 100:
+        if err > 10:
             self.speed = 1 / FPS
 
         if err < 5:
@@ -140,6 +142,13 @@ def setup_people(args):
 
 
 def main(args):
+
+    if args.seed:
+        print('Using given seed: %s' % args.seed)
+        random.seed(args.seed)
+    else:
+        print('USing default seed: %s' % SEED)
+        random.seed(SEED)
 
     pygame.init()
 
@@ -211,9 +220,12 @@ def main(args):
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_UP:
-                    pass
+                    args.num_people += 1
+                    print('num_people: %s' % args.num_people)
                 elif event.key == pygame.K_DOWN:
-                    pass
+                    if args.num_people > 3:
+                        args.num_people -= 1
+                        print('num_people: %s' % args.num_people)
                 elif event.key == pygame.K_LEFT:
                     pass
                 elif event.key == pygame.K_RIGHT:
@@ -231,6 +243,13 @@ if __name__ == '__main__':
         help='Number of people to involve. Default is 5',
         type=int,
         default=5
+    )
+
+    parser.add_argument(
+        '-s',
+        '--seed',
+        help='Random seed to use',
+        type=str,
     )
 
     args = parser.parse_args()
