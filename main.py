@@ -26,11 +26,13 @@ class Person:
     persons
     '''
 
-    def __init__(self, pos_x, pos_y, size=3, speed=1):
+    def __init__(self, pos_x, pos_y, size=3, err_tol=5):
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.size = size
-        self.speed = speed / FPS
+        self.err_tol = err_tol
+
+        self.speed = 1 / FPS
         self.color = BLUE
         self.match = False
 
@@ -89,13 +91,13 @@ class Person:
         err = to_target.copy().length()
         to_target_norm = to_target.copy().normalize()
 
-        if err < 10 and self.speed > 0.01:
+        if err < 2 * self.err_tol and self.speed > 0.01:
             self.speed *= 0.9
 
-        if err > 10:
+        if err > 2 * self.err_tol:
             self.speed = 1 / FPS
 
-        if err < 5:
+        if err < self.err_tol:
             self.match = True
             return
 
@@ -133,6 +135,7 @@ def setup_people(args):
         Person(
             pos_x=random.randint(int((1/3)*WIDTH), int((2/3)*WIDTH)),
             pos_y=random.randint(int((1/3)*HEIGHT), int((2/3)*HEIGHT)),
+            err_tol=args.err_tol,
         )
         for _ in range(args.num_people)
     ]
@@ -147,7 +150,7 @@ def main(args):
         print('Using given seed: %s' % args.seed)
         random.seed(args.seed)
     else:
-        print('USing default seed: %s' % SEED)
+        print('Using default seed: %s' % SEED)
         random.seed(SEED)
 
     pygame.init()
@@ -227,9 +230,11 @@ def main(args):
                         args.num_people -= 1
                         print('num_people: %s' % args.num_people)
                 elif event.key == pygame.K_LEFT:
-                    pass
+                    args.err_tol -= 1
+                    print('err_tol: %s' % args.err_tol)
                 elif event.key == pygame.K_RIGHT:
-                    pass
+                    args.err_tol += 1
+                    print('err_tol: %s' % args.err_tol)
                 elif event.key == pygame.K_BACKSPACE:
                     people = setup_people(args)
                 else:
@@ -250,6 +255,14 @@ if __name__ == '__main__':
         '--seed',
         help='Random seed to use',
         type=str,
+    )
+
+    parser.add_argument(
+        '-e',
+        '--err_tol',
+        help='Error tolerance. Default is 5',
+        type=int,
+        default=5
     )
 
     args = parser.parse_args()
