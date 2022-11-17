@@ -50,6 +50,9 @@ class Person:
         partners, slow down when close to target
         '''
 
+        if random.random() < 0.5:
+            return
+
         me = pygame.math.Vector2(
             self.pos_x,
             self.pos_y,
@@ -131,8 +134,8 @@ def setup_people(args):
     # prepare people
     people = [
         Person(
-            pos_x=random.randint((1/4)*WIDTH, (3/4)*WIDTH),
-            pos_y=random.randint((1/4)*HEIGHT, (3/4)*HEIGHT),
+            pos_x=random.randint(int((1/3)*WIDTH), int((2/3)*WIDTH)),
+            pos_y=random.randint(int((1/3)*HEIGHT), int((2/3)*HEIGHT)),
         )
         for _ in range(args.num_people)
     ]
