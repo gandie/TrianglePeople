@@ -24,12 +24,13 @@ class Person:
     persons
     '''
 
-    def __init__(self, pos_x, pos_y, size=10, speed=1):
+    def __init__(self, pos_x, pos_y, size=3, speed=1):
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.size = size
         self.speed = speed / FPS
         self.color = BLUE
+        self.match = False
 
     def setup(self, people):
         '''
@@ -49,9 +50,6 @@ class Person:
         Calculate closest target point to form equilateral triangle with
         partners, slow down when close to target
         '''
-
-        if random.random() < 0.5:
-            return
 
         me = pygame.math.Vector2(
             self.pos_x,
@@ -87,23 +85,23 @@ class Person:
             to_target = to_target_right
 
         err = to_target.copy().length()
+        to_target_norm = to_target.copy().normalize()
 
-        if err < 10 and self.speed > 0.0005:
+        if err < 10 and self.speed > 0.005:
             self.speed *= 0.9
 
         if err > 100:
             self.speed = 1 / FPS
 
-        if err < 0.01:
-            print('match!')
-            self.color = GREEN
+        if err < 5:
+            self.match = True
             return
 
-        self.color = BLUE
-        to_target_norm = to_target.copy().normalize()
+        self.match = False
 
-        self.pos_x += to_target_norm.x * self.speed * dt
-        self.pos_y += to_target_norm.y * self.speed * dt
+        if random.random() < 0.5:
+            self.pos_x += to_target_norm.x * self.speed * dt
+            self.pos_y += to_target_norm.y * self.speed * dt
 
     def draw(self, display):
         '''
@@ -117,7 +115,7 @@ class Person:
 
         pygame.draw.rect(
             surface,
-            self.color,
+            GREEN if self.match else BLUE,
             (0, 0, self.size, self.size),
         )
 
@@ -126,7 +124,9 @@ class Person:
 
 
 def setup_people(args):
-    # prepare people
+    '''
+    Create list of people and call setup method afterwards
+    '''
     people = [
         Person(
             pos_x=random.randint(int((1/3)*WIDTH), int((2/3)*WIDTH)),
@@ -173,6 +173,23 @@ def main(args):
             person.draw(display)
 
         screen.blit(display, (0, 0))
+
+        for person in people:
+            if person.match:
+                pygame.draw.line(
+                    screen,
+                    GREEN,
+                    (person.pos_x, person.pos_y),
+                    (person.pa.pos_x, person.pa.pos_y),
+                    width=1,
+                )
+                pygame.draw.line(
+                    screen,
+                    GREEN,
+                    (person.pos_x, person.pos_y),
+                    (person.pb.pos_x, person.pb.pos_y),
+                    width=1,
+                )
 
         pygame.display.flip()
 
