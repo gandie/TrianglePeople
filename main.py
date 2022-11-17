@@ -245,9 +245,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('TrianglePeople')
     parser.add_argument(
         'num_people',
-        help='Number of people to involve. Default is 5',
+        help='Number of people to involve',
         type=int,
-        default=5
     )
 
     parser.add_argument(
